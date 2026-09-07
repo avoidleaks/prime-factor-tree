@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Factorization Tree</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #e0e7ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 15px;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 300;
+        }
+
+        /* Main Card */
+        .main-card {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            padding: 40px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .control-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-end;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            background: white;
+            color: var(--text-primary);
+        }
+
+        select:hover, input[type="number"]:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        #btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        #btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        #btn:active {
+            transform: translateY(0);
+        }
+
+        #clearBtn {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        #clearBtn:hover {
+            background: #cbd5e1;
+        }
+
+        /* Results Section */
+        .results-section {
+            padding: 40px;
+        }
+
+        #resultText {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            border-radius: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            animation: slideInLeft 0.5s ease-out forwards;
+        }
+
+        #resultText.error {
+            background: var(--danger-light);
+            border-left-color: var(--danger);
+            color: var(--danger);
+        }
+
+        #resultText.hidden {
+            display: none;
+        }
+
+        /* Tree Container */
+        #treeContainer {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 15px;
+            padding: 40px 20px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Tree Styling */
+        .tree ul {
+            padding-top: 20px;
+            position: relative;
+            transition: all 0.5s;
+            display: flex;
+            justify-content: center;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .tree li {
+            float: left;
+            text-align: center;
+            list-style-type: none;
+            position: relative;
+            padding: 20px 5px 0 5px;
+            transition: all 0.5s;
+        }
+
+        /* Tree Lines */
+        .tree li::before, .tree li::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 50%;
+            border-top: 2px solid var(--primary);
+            width: 50%;
+            height: 20px;
+        }
+
+        .tree li::after {
+            right: auto;
+            left: 50%;
+            border-left: 2px solid var(--primary);
+        }
+
+        .tree li:only-child::after,
+        .tree li:only-child::before {
+            display: none;
+        }
+
+        .tree li:only-child {
+            padding-top: 0;
+        }
+
+        .tree li:first-child::before,
+        .tree li:last-child::after {
+            border: none;
+        }
+
+        .tree li:last-child::before {
+            border-right: 2px solid var(--primary);
+            border-radius: 0 5px 0 0;
+        }
+
+        .tree li:first-child::after {
+            border-radius: 5px 0 0 0;
+        }
+
+        .tree ul ul::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            border-left: 2px solid var(--primary);
+            width: 0;
+            height: 20px;
+        }
+
+        /* Animated Node Circles */
+        .node {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.5rem;
+            border: 3px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            box-shadow: var(--shadow-md);
+            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            opacity: 0;
+            transform: scale(0);
+            cursor: default;
+            position: relative;
+            z-index: 1;
+        }
+
+        .node:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .node.prime {
+            border-color: var(--success);
+            background: var(--success-light);
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .node.prime::after {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--success);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0);
+            }
+            70% {
+                transform: scale(1.15);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Stats Footer */
+        .stats-footer {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 25px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-item .value {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stat-item.hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .control-panel {
+                padding: 25px;
+            }
+
+            .control-group {
+                flex-direction: column;
+            }
+
+            .form-group {
+                width: 100%;
+            }
+
+            .button-group {
+                width: 100%;
+            }
+
+            button {
+                min-width: unset;
+                width: 100%;
+            }
+
+            #treeContainer {
+                padding: 25px 15px;
+            }
+
+            .tree ul ul {
+                gap: 30px;
+            }
+
+            .node {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .stats-footer {
+                padding: 20px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1 id="title">Prime Factorization Tree</h1>
+        <p id="subtitle">Visualize the prime factors of any number</p>
+    </div>
+
+    <!-- Main Card -->
+    <div class="main-card">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="control-group">
+                <div class="form-group">
+                    <label for="langSelect">Language</label>
+                    <select id="langSelect" onchange="changeLanguage()">
+                        <option value="ka">ქართული (Georgian)</option>
+                        <option value="en" selected>English</option>
+                        <option value="es">Español (Spanish)</option>
+                        <option value="fr">Français (French)</option>
+                        <option value="de">Deutsch (German)</option>
+                        <option value="it">Italiano (Italian)</option>
+                        <option value="pt">Português (Portuguese)</option>
+                        <option value="nl">Nederlands (Dutch)</option>
+                        <option value="pl">Polski (Polish)</option>
+                        <option value="ru">Русский (Russian)</option>
+                        <option value="uk">Українська (Ukrainian)</option>
+                        <option value="tr">Türkçe (Turkish)</option>
+                        <option value="az">Azərbaycan (Azerbaijani)</option>
+                        <option value="hy">Հայերեն (Armenian)</option>
+                        <option value="el">Ελληνικά (Greek)</option>
+                        <option value="zh">中文 (Chinese)</option>
+                        <option value="ja">日本語 (Japanese)</option>
+                        <option value="ko">한국어 (Korean)</option>
+                        <option value="ar">العربية (Arabic)</option>
+                        <option value="hi">हिन्दी (Hindi)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="numInput">Enter a number</label>
+                    <input type="number" id="numInput" min="2" value="88">
+                </div>
+
+                <div class="button-group">
+                    <button id="btn" onclick="calculate()">Calculate</button>
+                    <button id="clearBtn" onclick="clearCalculation()">Clear</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section">
+            <div id="resultText" class="hidden"></div>
+            <div id="treeContainer" class="tree">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🌳</div>
+                    <p id="emptyMsg">Enter a number and click Calculate to see the factorization tree</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Footer -->
+        <div class="stats-footer">
+            <div class="stat-item">
+                <h3 id="stat1-label">Input Number</h3>
+                <div class="value" id="stat1">—</div>
+            </div>
+            <div class="stat-item">
+                <h3 id="stat2-label">Prime Factors</h3>
+                <div class="value" id="stat2">—</div>
+            </div>
+            <div class="stat-item">
+                <h3 id="stat3-label">Factor Count</h3>
+                <div class="value" id="stat3">—</div>
+            </div>
+            <div class="stat-item">
+                <h3 id="stat4-label">Unique Primes</h3>
+                <div class="value" id="stat4">—</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const translations = {
+    ka: { 
+        title: "მარტივ მამრავლებად დაშლის ხე", 
+        subtitle: "ნებისმიერი რიცხვის მარტივ მამრავლებს ვიზუალიზაცია",
+        placeholder: "შეიყვანეთ მთელი რიცხვი > 1", 
+        btn: "გამოთვლა", 
+        clear: "გასუფთავება",
+        invalid: "გთხოვთ შეიყვანოთ 1-ზე მეტი მთელი რიცხვი.", 
+        res: "მარტივი მამრავლები",
+        language: "ენა",
+        emptyMsg: "შეიყვანეთ რიცხვი და დააჭირეთ გამოთვლა ხის სანახავად",
+        stat1: "შეტანილი რიცხვი",
+        stat2: "მარტივი მამრავლები",
+        stat3: "მამრავლების რაოდენობა",
+        stat4: "უნიკალური მარტივი"
+    },
+    en: { 
+        title: "Prime Factorization Tree", 
+        subtitle: "Visualize the prime factors of any number",
+        placeholder: "Enter an integer > 1", 
+        btn: "Calculate", 
+        clear: "Clear",
+        invalid: "Please enter an integer greater than 1.", 
+        res: "Prime Factors",
+        language: "Language",
+        emptyMsg: "Enter a number and click Calculate to see the factorization tree",
+        stat1: "Input Number",
+        stat2: "Prime Factors",
+        stat3: "Factor Count",
+        stat4: "Unique Primes"
+    },
+    es: { 
+        title: "Árbol de Factorización Prima", 
+        subtitle: "Visualiza los factores primos de cualquier número",
+        placeholder: "Ingrese un entero > 1", 
+        btn: "Calcular", 
+        clear: "Limpiar",
+        invalid: "Ingrese un número entero mayor que 1.", 
+        res: "Factores Primos",
+        language: "Idioma",
+        emptyMsg: "Ingrese un número y haga clic en Calcular para ver el árbol de factorización",
+        stat1: "Número de entrada",
+        stat2: "Factores primos",
+        stat3: "Cantidad de factores",
+        stat4: "Primos únicos"
+    },
+    fr: { 
+        title: "Arbre de Factorisation Première", 
+        subtitle: "Visualisez les facteurs premiers de n'importe quel nombre",
+        placeholder: "Entrez un entier > 1", 
+        btn: "Calculer", 
+        clear: "Effacer",
+        invalid: "Veuillez entrer un entier supérieur à 1.", 
+        res: "Facteurs Premiers",
+        language: "Langue",
+        emptyMsg: "Entrez un nombre et cliquez sur Calculer pour voir l'arbre de factorisation",
+        stat1: "Nombre saisi",
+        stat2: "Facteurs premiers",
+        stat3: "Nombre de facteurs",
+        stat4: "Nombres premiers uniques"
+    },
+    de: { 
+        title: "Primfaktorisierung Baum", 
+        subtitle: "Visualisieren Sie die Primfaktoren einer beliebigen Zahl",
+        placeholder: "Ganzzahl > 1 eingeben", 
+        btn: "Berechnen", 
+        clear: "Löschen",
+        invalid: "Bitte geben Sie eine Ganzzahl größer als 1 ein.", 
+        res: "Primfaktoren",
+        language: "Sprache",
+        emptyMsg: "Geben Sie eine Zahl ein und klicken Sie auf Berechnen, um den Faktorisierungsbaum zu sehen",
+        stat1: "Eingabezahl",
+        stat2: "Primfaktoren",
+        stat3: "Anzahl der Faktoren",
+        stat4: "Eindeutige Primzahlen"
+    },
+    it: { 
+        title: "Albero di Fattorizzazione In Primi", 
+        subtitle: "Visualizza i fattori primi di qualsiasi numero",
+        placeholder: "Inserisci un intero > 1", 
+        btn: "Calcola", 
+        clear: "Cancella",
+        invalid: "Inserisci un numero intero maggiore di 1.", 
+        res: "Fattori Primi",
+        language: "Lingua",
+        emptyMsg: "Inserisci un numero e fai clic su Calcola per visualizzare l'albero di fattorizzazione",
+        stat1: "Numero di ingresso",
+        stat2: "Fattori primi",
+        stat3: "Numero di fattori",
+        stat4: "Numeri primi univoci"
+    },
+    pt: { 
+        title: "Árvore de Fatoração Prima", 
+        subtitle: "Visualize os fatores primos de qualquer número",
+        placeholder: "Insira um número inteiro > 1", 
+        btn: "Calcular", 
+        clear: "Limpar",
+        invalid: "Insira um número inteiro maior que 1.", 
+        res: "Fatores Primos",
+        language: "Idioma",
+        emptyMsg: "Insira um número e clique em Calcular para ver a árvore de fatoração",
+        stat1: "Número de entrada",
+        stat2: "Fatores primos",
+        stat3: "Número de fatores",
+        stat4: "Números primos únicos"
+    },
+    nl: { 
+        title: "Prime Factorisatie Boom", 
+        subtitle: "Visualiseer de priemfactoren van elk getal",
+        placeholder: "Voer een geheel getal in > 1", 
+        btn: "Berekenen", 
+        clear: "Wissen",
+        invalid: "Voer een geheel getal in groter dan 1.", 
+        res: "Priemfactoren",
+        language: "Taal",
+        emptyMsg: "Voer een getal in en klik op Berekenen om de factorisatieboom te zien",
+        stat1: "Invoernummer",
+        stat2: "Priemfactoren",
+        stat3: "Aantal factoren",
+        stat4: "Unieke priemgetallen"
+    },
+    pl: { 
+        title: "Drzewo Rozkładu na Czynniki Pierwsze", 
+        subtitle: "Wizualizuj czynniki pierwsze dowolnej liczby",
+        placeholder: "Wpisz liczbę całkowitą > 1", 
+        btn: "Oblicz", 
+        clear: "Wyczyść",
+        invalid: "Wpisz liczbę całkowitą większą niż 1.", 
+        res: "Czynniki Pierwsze",
+        language: "Język",
+        emptyMsg: "Wpisz liczbę i kliknij Oblicz, aby zobaczyć drzewo faktoryzacji",
+        stat1: "Liczba wejściowa",
+        stat2: "Czynniki pierwsze",
+        stat3: "Liczba czynników",
+        stat4: "Unikalne liczby pierwsze"
+    },
+    ru: { 
+        title: "Дерево простых множителей", 
+        subtitle: "Визуализируйте простые множители любого числа",
+        placeholder: "Введите целое число > 1", 
+        btn: "Рассчитать", 
+        clear: "Очистить",
+        invalid: "Пожалуйста, введите целое число больше 1.", 
+        res: "Простые множители",
+        language: "Язык",
+        emptyMsg: "Введите число и нажмите Рассчитать, чтобы увидеть дерево факторизации",
+        stat1: "Входное число",
+        stat2: "Простые множители",
+        stat3: "Количество множителей",
+        stat4: "Уникальные простые числа"
+    },
+    uk: { 
+        title: "Дерево простых множників", 
+        subtitle: "Візуалізуйте прості множники будь-якого числа",
+        placeholder: "Введіть ціле число > 1", 
+        btn: "Обчислити", 
+        clear: "Очистити",
+        invalid: "Будь ласка, введіть ціле число більше 1.", 
+        res: "Прості множники",
+        language: "Мова",
+        emptyMsg: "Введіть число і натисніть Обчислити, щоб побачити дерево факторизації",
+        stat1: "Вхідне число",
+        stat2: "Прості множники",
+        stat3: "Кількість множників",
+        stat4: "Унікальні прості числа"
+    },
+    tr: { 
+        title: "Asal Çarpan Ağacı", 
+        subtitle: "Herhangi bir sayının asal çarpanlarını görselleştirin",
+        placeholder: "1'den büyük bir tam sayı girin", 
+        btn: "Hesapla", 
+        clear: "Temizle",
+        invalid: "Lütfen 1'den büyük bir tam sayı girin.", 
+        res: "Asal Çarpanlar",
+        language: "Dil",
+        emptyMsg: "Bir sayı girin ve çarpanlara ayırma ağacını görmek için Hesapla'yı tıklayın",
+        stat1: "Giriş Sayısı",
+        stat2: "Asal çarpanlar",
+        stat3: "Çarpan sayısı",
+        stat4: "Benzersiz asal sayılar"
+    },
+    az: { 
+        title: "Sadə Vuruq Ağacı", 
+        subtitle: "Hər hansı bir ədədin sadə vuruqlarını görselleştirin",
+        placeholder: "1-dən büyük tam ədəd daxil edin", 
+        btn: "Hesabla", 
+        clear: "Təmizlə",
+        invalid: "Lütfən 1-dən böyük tam ədəd daxil edin.", 
+        res: "Sadə vuruqlar",
+        language: "Dil",
+        emptyMsg: "Ədəd daxil edin və çarpanlandırma ağacını görmək üçün Hesabla'yı tıklayın",
+        stat1: "Giriş nömrəsi",
+        stat2: "Sadə faktörler",
+        stat3: "Faktor sayı",
+        stat4: "Unikal sadə ədədlər"
+    },
+    hy: { 
+        title: "Պարզ Արտադրիչների Ծառ", 
+        subtitle: "Ցանկացած թվի պարզ արտադրիչներ ցույց տալ",
+        placeholder: "Մուտքագրեք 1-ից մեծ ամբողջ թիվ", 
+        btn: "Հաշվել", 
+        clear: "Մաքրել",
+        invalid: "Խնդրում ենք մուտքագրել 1-ից մեծ ամբողջ թիվ:", 
+        res: "Պարզ արտադրիչներ",
+        language: "Լեզու",
+        emptyMsg: "Մուտքագրեք թիվ և կտտացրեք Հաշվել՝ ֆակտորիզացիայի ծառ տեսնելու համար",
+        stat1: "Մուտքային թիվ",
+        stat2: "Պարզ գործակիցներ",
+        stat3: "Գործոնների քանակ",
+        stat4: "Եզակի պարզ թվեր"
+    },
+    el: { 
+        title: "Δέντρο Πρώτων Παραγόντων", 
+        subtitle: "Οπτικοποιήστε τους πρώτους παράγοντες οποιουδήποτε αριθμού",
+        placeholder: "Εισαγάγετε ακέραιο > 1", 
+        btn: "Υπολογισμός", 
+        clear: "Διαγραφή",
+        invalid: "Εισαγάγετε έναν ακέραιο μεγαλύτερο από 1.", 
+        res: "Πρώτοι Παράγοντες",
+        language: "Γλώσσα",
+        emptyMsg: "Εισαγάγετε έναν αριθμό και κάντε κλικ στον Υπολογισμό για να δείτε το δέντρο παραγοντοποίησης",
+        stat1: "Αριθμός εισόδου",
+        stat2: "Πρώτοι παράγοντες",
+        stat3: "Αριθμός παραγόντων",
+        stat4: "Μοναδικοί πρώτοι αριθμοί"
+    },
+    zh: { 
+        title: "质因数分解树", 
+        subtitle: "可视化任何数字的质因数",
+        placeholder: "输入大于 1 的整数", 
+        btn: "计算", 
+        clear: "清除",
+        invalid: "请输入大于 1 的整数。", 
+        res: "质因数",
+        language: "语言",
+        emptyMsg: "输入数字并点击计算以查看因数分解树",
+        stat1: "输入数字",
+        stat2: "质因数",
+        stat3: "因子个数",
+        stat4: "唯一质数"
+    },
+    ja: { 
+        title: "素因数分解ツリー", 
+        subtitle: "任意の数の素因数を視覚化します",
+        placeholder: "1より大きい整数を入力", 
+        btn: "計算", 
+        clear: "クリア",
+        invalid: "1より大きい整数を入力してください。", 
+        res: "素因数",
+        language: "言語",
+        emptyMsg: "数字を入力して[計算]をクリックして、因数分解ツリーを表示します",
+        stat1: "入力番号",
+        stat2: "素因数",
+        stat3: "因子の数",
+        stat4: "ユニークな素数"
+    },
+    ko: { 
+        title: "소인수분해 나무", 
+        subtitle: "임의의 수의 소인수를 시각화합니다",
+        placeholder: "1보다 큰 정수 입력", 
+        btn: "계산", 
+        clear: "지우기",
+        invalid: "1보다 큰 정수를 입력하세요.", 
+        res: "소인수",
+        language: "언어",
+        emptyMsg: "숫자를 입력하고 계산을 클릭하여 인수분해 트리를 확인하세요",
+        stat1: "입력 번호",
+        stat2: "소인수",
+        stat3: "요인 수",
+        stat4: "고유한 소수"
+    },
+    ar: { 
+        title: "شجرة التحليل إلى العوامل الأولية", 
+        subtitle: "تصور العوامل الأولية لأي رقم",
+        placeholder: "أدخل عددًا صحيحًا > 1", 
+        btn: "احسب", 
+        clear: "امسح",
+        invalid: "الرجاء إدخال عدد صحيح أكبر من 1.", 
+        res: "العوامل الأولية",
+        language: "اللغة",
+        emptyMsg: "أدخل رقمًا وانقر على احسب لرؤية شجرة التحليل إلى عوامل",
+        stat1: "رقم الإدخال",
+        stat2: "العوامل الأولية",
+        stat3: "عدد العوامل",
+        stat4: "الأعداد الأولية الفريدة"
+    },
+    hi: { 
+        title: "अभाज्य गुणनखंड वृक्ष", 
+        subtitle: "किसी भी संख्या के अभाज्य गुणनखंडों को देखें",
+        placeholder: "1 से बड़ा पूर्णांक दर्ज करें", 
+        btn: "गणना करें", 
+        clear: "साफ़ करें",
+        invalid: "कृपया 1 से बड़ा पूर्णांक दर्ज करें।", 
+        res: "अभाज्य गुणनखंड",
+        language: "भाषा",
+        emptyMsg: "एक संख्या दर्ज करें और गुणनखंडन वृक्ष देखने के लिए गणना करें पर क्लिक करें",
+        stat1: "इनपुट संख्या",
+        stat2: "अभाज्य गुणनखंड",
+        stat3: "गुणनखंड गणना",
+        stat4: "अद्वितीय अभाज्य"
+    }
+};
+
+let currentLang = 'en';
+
+function changeLanguage() {
+    currentLang = document.getElementById('langSelect').value;
+    updateLanguageUI();
+    calculate();
+}
+
+function updateLanguageUI() {
+    const langData = translations[currentLang];
+    document.getElementById('title').innerText = langData.title;
+    document.getElementById('subtitle').innerText = langData.subtitle;
+    document.getElementById('numInput').placeholder = langData.placeholder;
+    document.getElementById('btn').innerText = langData.btn;
+    document.getElementById('clearBtn').innerText = langData.clear;
+    document.getElementById('emptyMsg').innerText = langData.emptyMsg;
+    document.getElementById('stat1-label').innerText = langData.stat1;
+    document.getElementById('stat2-label').innerText = langData.stat2;
+    document.getElementById('stat3-label').innerText = langData.stat3;
+    document.getElementById('stat4-label').innerText = langData.stat4;
+}
+
+function isPrime(n) {
+    if (n < 2) return false;
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) return false;
+    }
+    return true;
+}
+
+function getSmallestFactor(n) {
+    for (let i = 2; i <= Math.sqrt(n); i++) {
+        if (n % i === 0) return i;
+    }
+    return n;
+}
+
+let delay = 0;
+
+function buildTreeHTML(num) {
+    const isNumPrime = isPrime(num);
+    const nodeClass = isNumPrime ? "node prime" : "node";
+    const currentDelay = delay;
+    delay += 0.2;
+
+    if (isNumPrime) {
+        return `<li><span class="${nodeClass}" style="animation-delay: ${currentDelay}s">${num}</span></li>`;
+    }
+
+    const factor1 = getSmallestFactor(num);
+    const factor2 = num / factor1;
+
+    return `
+        <li>
+            <span class="${nodeClass}" style="animation-delay: ${currentDelay}s">${num}</span>
+            <ul>
+                ${buildTreeHTML(factor1)}
+                ${buildTreeHTML(factor2)}
+            </ul>
+        </li>
+    `;
+}
+
+function getPrimeFactorsList(n) {
+    const factors = [];
+    let divisor = 2;
+    while (n >= 2) {
+        if (n % divisor === 0) {
+            factors.push(divisor);
+            n = n / divisor;
+        } else {
+            divisor++;
+        }
+    }
+    return factors;
+}
+
+function getUniquePrimeFactors(factors) {
+    return [...new Set(factors)];
+}
+
+function calculate() {
+    const num = parseInt(document.getElementById('numInput').value);
+    const langData = translations[currentLang];
+    const resultDiv = document.getElementById('resultText');
+    const treeDiv = document.getElementById('treeContainer');
+
+    if (isNaN(num) || num <= 1) {
+        resultDiv.innerText = langData.invalid;
+        resultDiv.classList.add('error');
+        resultDiv.classList.remove('hidden');
+        treeDiv.innerHTML = `<div class="empty-state">
+            <div class="empty-state-icon">⚠️</div>
+            <p>${langData.emptyMsg}</p>
+        </div>`;
+        clearStats();
+        return;
+    }
+
+    resultDiv.classList.remove('error');
+    const factors = getPrimeFactorsList(num);
+    const uniqueFactors = getUniquePrimeFactors(factors);
+    
+    resultDiv.innerText = langData.res + ": " + factors.join(" × ");
+    resultDiv.classList.remove('hidden');
+
+    delay = 0;
+    treeDiv.innerHTML = `<ul>${buildTreeHTML(num)}</ul>`;
+
+    // Update stats
+    document.getElementById('stat1').innerText = num;
+    document.getElementById('stat2').innerText = factors.length;
+    document.getElementById('stat3').innerText = factors.length;
+    document.getElementById('stat4').innerText = uniqueFactors.length;
+}
+
+function clearCalculation() {
+    document.getElementById('numInput').value = '';
+    document.getElementById('resultText').classList.add('hidden');
+    document.getElementById('treeContainer').innerHTML = `<div class="empty-state">
+        <div class="empty-state-icon">🌳</div>
+        <p>${translations[currentLang].emptyMsg}</p>
+    </div>`;
+    clearStats();
+}
+
+function clearStats() {
+    document.getElementById('stat1').innerText = '—';
+    document.getElementById('stat2').innerText = '—';
+    document.getElementById('stat3').innerText = '—';
+    document.getElementById('stat4').innerText = '—';
+}
+
+// Initialize on page load
+updateLanguageUI();
+</script>
+
+</body>
+</html>
