@@ -11,7 +11,7 @@ An interactive, responsive, and fully localized web application that visualizes 
 
 ## 🚀 Live Demo
 You can run this project directly via GitHub Pages:
-`https://<your-username>.github.io/<your-repo-name>/`
+`https://<avoidleaks>.github.io/<prime-factor-tree>/`
 
 ## 🛠️ Usage
 1. Open `index.html` in any web browser.
@@ -37,7 +37,7 @@ You can run this project directly via GitHub Pages:
 
 ## 🚀 ონლაინ ვერსია (Live Demo)
 პროექტის ნახვა შეგიძლიათ GitHub Pages-ის საშუალებით:
-`https://<თქვენი-username>.github.io/<თქვენი-repo-სახელი>/`
+`https://<avoidleaks>.github.io/<prime-factor-tree>/`
 
 ## 🛠️ გამოყენება
 1. გახსენით `index.html` ნებისმიერ ბრაუზერში.
